@@ -1,0 +1,11 @@
+[Unit]
+Description=Nordscan Clients
+
+[Service]
+User=nordlo
+#Environment="LOG_LEVEL=DEBUG"
+Environment="LOG_FILE=/var/log/nordscan/nordscan-clients.log"
+ExecStart=/opt/nordscan/.env/bin/python /opt/nordscan/src/nordscan.py --config /home/nordlo/.nordscan/config_clients.yaml
+
+[Install]
+WantedBy=multi-user.target

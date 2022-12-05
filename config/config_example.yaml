@@ -1,0 +1,95 @@
+---
+#schedule: '' #use one liner crontab syntax (makes nordscan go into daemon mode to follow the schedule)
+nordscan:
+  threads:
+    input: 1 # how many input plugins (connections) to run in parallell
+    output: 1 # how many output plugins to run in parallell (1 is probably good)
+ldap:
+  host: # address to ldap server
+  search_base: # string containing search_base for finding computers # example: 'DC=Mydomain,DC=Local'
+  #search_filter: '(objectlass=computer)' # Filter for searching for computers
+  
+  
+  # Currently supported methods is either kerberos with tls or digest-md5 without tls
+
+  ## Kerberos (tls with kerberos tickets)
+  #method: kerberos  
+  
+  ## Digest-MD5( user/password without tls )
+  #method: digest-md5
+  #user: <username>
+  #password: <password>
+
+nmap:
+  #hosts: # supports what syntax nmap supports, e.g "192.168.0.1/24 192.168.2-3.1/24" 
+  #hosts_file: # should be a path to a file with nmap hostfile syntax
+  #hosts_file_ignore: # should be a path to a file with nmap hostfile syntax
+  #mode: 'ipv4' # can be set explicit to 'ipv6' (modes can not be mixed)
+input:
+  snmp:
+    community: # community string to use when connecting
+    # Dictionary of items "key": "translation". keys not found are omitted. Translation value is not mandatory.
+    items: 
+      #SNMPv2-MIB::sysDescr.0:
+      #SNMPv2-MIB::sysName.0: name
+      #SNMPv2-MIB::sysLocation.0: location
+
+  ssh:
+    ## if ssh_key or ssh_password is not set, ssh-agent authentication will be used.
+    #username: # if not specified it will connect with the username of the user running the process.
+    #password # use ssh password
+    #ssh_key: # use ssh_key
+    #ssh_key_password # use ssh_key with password
+    #python_versions: ['python3', 'python2.7']
+    #port:
+    # - 22
+    scripts:
+      - linux.py
+      #- linux-software.py # old syntax without any arguments
+      - name: linux-software.py # new syntax with possibility to give arguments
+        arguments:
+          filter: # include packages matching (all output keys can be filtered). Keys in filter list have an "or" relation.
+            #name: ['samba*', 'bash'] 
+            #section: ['shells']
+          ignore: # exclude packages matching (all output keys can be ignored). Keys in ignore list have an "or" relation
+            #section: ['libs']
+            #name: ['*common']
+  winrm:
+    #username: # if not specified it will connect with the login of the local user.
+    #password: # if not specified ticket authentication will will be used (requires domain account)
+    #auth: # defaults to 'negotiate' # could be set explicit to: 'kerberos' or 'ntlm'.
+    #ssl_cert: 
+    #ssl_key: 
+    #cert_valitation: False
+    #ps_version: 3 # 
+    #port: 
+    #  - 5985
+    scripts:
+      - windows.ps1
+      - windows-mssql.ps1
+output:
+  logstash:
+    address: http://localhost:5000
+    metadata:
+      name:  # IMPORTANT to specify. If you dont know what to write here, ask the people who are responsible for the logstash endpoint.
+      customer: # IMPORTANT to specify. If you dont know what to write here, ask the people who are responsible for the logstash endpoint.
+      #splitdata:
+      #  source:
+      #  system:
+      #    uuid:
+    #retry_timer = 30 # number of seconds to wait if logstash does not answer. 0 means no retries
+    #ssl_ca: # ca cert for verification
+    #ssl_cert: # certificate for host
+    #ssl_key: # key for host
+    #types can be used to change type based on what data was retrieved. filters are "key": "value" with an 'and' condition when parsing.
+    #types:
+      #default: 'computer' #default device if no type is matching
+      #type:
+      #  - name: 'networkdevice'
+      #    filter:
+      #      snmp.name: '*' 
+      #      snmp.contact: 'root@*' #and relation between key-values
+      #  - name: 'linux-client'
+      #    filter:
+      #      os.name: 'Debian*'
+      #      source.name: "client*"

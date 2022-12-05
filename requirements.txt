@@ -1,0 +1,8 @@
+pypsrp[kerberos]
+ssh2-python
+ldap3
+pysnmp
+pyyaml
+pycron
+xmltodict
+winkerberos; sys_platform=="win32"
